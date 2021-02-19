@@ -11,16 +11,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define NO_GROUPS_MAX 5
 #define BUFFER_SIZE 1024
-#define GROUP_NAME_MAX 20
-#define NO_CLIENTS_MAX 100
 
 int fd;    // socket descripter
-int conn;  // connection descripter
-int connections[NO_GROUPS_MAX][NO_CLIENTS_MAX];
-char group_names[NO_GROUPS_MAX][GROUP_NAME_MAX];
-int connections_Count[NO_GROUPS_MAX];
+int cd;  // connection descripter
+int connections[5][20];
+char group_names[5][20];
+int connections_Count[5];
 int group_count = 0;
 
 pthread_mutex_t newConnectionLock = PTHREAD_MUTEX_INITIALIZER;
@@ -42,9 +39,7 @@ struct Message {
     char message[200];
 };
 void closeServer() {
-    printf(
-        "Are you sure you want to close the server ? All groups will be "
-        "deleted (Y/N) \n");
+    printf( "Are you sure you want to close the server ? All groups will be deleted (Y/N) \n");
     char response;
     scanf("%c", &response);
     if (response == 'Y' || response == 'y') {
@@ -124,8 +119,8 @@ void *connection_handler(void *connec) {
     return NULL;
 }
 
-// main function:
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
     int fd, new_socket, valread;
     struct sockaddr_in serv, client;
 
@@ -133,7 +128,8 @@ int main(int argc, char *argv[]) {
 
     pthread_t thread;
     // opening socket
-    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
@@ -143,29 +139,29 @@ int main(int argc, char *argv[]) {
     int port_no = atoi(argv[1]);
     printf("%d\n", port_no);
     serv.sin_family = AF_INET;
-    serv.sin_port =
-        htons(port_no);  // port at which server will listen for connections
+    serv.sin_port =htons(port_no);              // port at which server will listen for connections
     serv.sin_addr.s_addr = INADDR_ANY;
 
     int true = 1;
-    // setsockopt(fd,SOL_SOCKET,SO_REUSEAADR, &true, sizeof(int));
-
-    if (bind(fd, (struct sockaddr *)&serv, sizeof(serv)) < 0) {
+    if (bind(fd, (struct sockaddr *)&serv, sizeof(serv)) < 0) 
+    {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
 
-    if (listen(fd, 3) < 0) {
+    if (listen(fd, 3) < 0)
+    {
         perror("listen");
         exit(EXIT_FAILURE);
     }
     clientLen = sizeof(client);
-    while (1) {
+    while (1) 
+    {
         printf("entered loop\n");
-        conn = accept(fd, (struct sockaddr *)&serv, (socklen_t *)&addrlen);
-        printf("%d\n", conn);
-        if (pthread_create(&thread, NULL, connection_handler, (void *)&conn) <
-            0) {
+        cd = accept(fd, (struct sockaddr *)&serv, (socklen_t *)&addrlen);
+        printf("%d\n", cd);
+        if (pthread_create(&thread, NULL, connection_handler, (void *)&cd) <0) 
+        {
             perror("thread not created");
             exit(0);
         }
